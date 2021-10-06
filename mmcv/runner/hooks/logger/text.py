@@ -14,10 +14,8 @@ from .base import LoggerHook
 @HOOKS.register_module()
 class TextLoggerHook(LoggerHook):
     """Logger hook in text.
-
     In this logger hook, the information will be printed on terminal and
     saved in json file.
-
     Args:
         by_epoch (bool): Whether EpochBasedRunner is used.
         interval (int): Logging interval (every k iterations).
@@ -110,6 +108,7 @@ class TextLoggerHook(LoggerHook):
                 log_str = f'Iter({log_dict["mode"]}) [{log_dict["iter"]}]\t'
 
         log_items = []
+        log_train_items = []
         for name, val in log_dict.items():
             # TODO: resolve this hack
             # these items have been in log_str
@@ -118,12 +117,21 @@ class TextLoggerHook(LoggerHook):
                     'memory', 'epoch'
             ]:
                 continue
-            if isinstance(val, float):
-                val = f'{val:.4f}'
-            log_items.append(f'{name}: {val}')
+            if name.endswith('_train'):
+                log_train_items.append(f'{name}: {val:.4f}')
+            else:
+                if isinstance(val, float):
+                    val = f'{val:.4f}'
+                log_items.append(f'{name}: {val}')
         log_str += ', '.join(log_items)
 
         runner.logger.info(log_str)
+
+        if len(log_train_items) > 0:
+            log_str = f'Epoch(train) ' \
+                    f'[{log_dict["epoch"]}][{len(runner.data_loader)}]\t'
+            log_str += ', '.join(log_train_items)
+            runner.logger.info(log_str)
 
     def _dump_log(self, log_dict, runner):
         # dump log in json format

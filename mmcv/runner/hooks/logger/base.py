@@ -4,13 +4,13 @@ from abc import ABCMeta, abstractmethod
 
 import numpy as np
 import torch
+from torch._C import _log_api_usage_once
 
 from ..hook import Hook
 
 
 class LoggerHook(Hook):
     """Base class for logger hooks.
-
     Args:
         interval (int): Logging interval (every k iterations).
         ignore_last (bool): Ignore the log of last iterations in each epoch
@@ -38,12 +38,10 @@ class LoggerHook(Hook):
     @staticmethod
     def is_scalar(val, include_np=True, include_torch=True):
         """Tell the input variable is a scalar or not.
-
         Args:
             val: Input variable.
             include_np (bool): Whether include 0-d np.ndarray as a scalar.
             include_torch (bool): Whether include 0-d torch.Tensor as a scalar.
-
         Returns:
             bool: True or False.
         """
